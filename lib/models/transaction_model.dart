@@ -1,18 +1,22 @@
+// ============================================================
+// مسیر: lib/models/transaction_model.dart
+// ============================================================
 class TransactionModel {
   final String id;
   final String title;
   final double amount;
-  final String date;      // تاریخ شمسی
-  final String time;      // ساعت
-  final String type;      // 'income', 'expense', 'saving', 'goal', 'loan', 'debt', 'credit'
-  final String categoryId; // شناسه دسته‌بندی
-  final String categoryName; // نام دسته‌بندی (برای نمایش سریع)
-  final String paymentMethod; // 'cash', 'card', 'check', 'transfer'
-  final String? contact;     // طرف حساب
-  final String? note;        // یادداشت
-  final String? priority;    // 'low', 'medium', 'high'
-  final String? recurrence;  // 'once', 'monthly', 'yearly'
-  final double? target;      // برای اهداف
+  final String date;
+  final String time;
+  final String type;
+  final String categoryId;
+  final String categoryName;
+  final String paymentMethod;
+  final String? contact;
+  final String? note;
+  final String? priority;
+  final String? recurrence;
+  final double? target;
+  final String? goalId; // ✅ اضافه شد
 
   TransactionModel({
     required this.id,
@@ -29,6 +33,7 @@ class TransactionModel {
     this.priority,
     this.recurrence,
     this.target,
+    this.goalId,
   });
 
   Map<String, dynamic> toJson() => {
@@ -46,22 +51,24 @@ class TransactionModel {
         'priority': priority,
         'recurrence': recurrence,
         'target': target,
+        'goalId': goalId,
       };
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) => TransactionModel(
-        id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id: json['id'] ?? '',
         title: json['title'] ?? '',
         amount: (json['amount'] ?? 0).toDouble(),
         date: json['date'] ?? '',
         time: json['time'] ?? '',
-        type: json['type'] ?? 'expense',
+        type: json['type'] ?? '',
         categoryId: json['categoryId'] ?? '',
-        categoryName: json['categoryName'] ?? 'سایر',
-        paymentMethod: json['paymentMethod'] ?? 'cash',
+        categoryName: json['categoryName'] ?? '',
+        paymentMethod: json['paymentMethod'] ?? '',
         contact: json['contact'],
         note: json['note'],
         priority: json['priority'],
         recurrence: json['recurrence'],
-        target: (json['target'] as num?)?.toDouble(),
+        target: json['target']?.toDouble(),
+        goalId: json['goalId'],
       );
 }

@@ -32,7 +32,8 @@ class CurrencyProvider extends ChangeNotifier {
   }
 
   String formatNumber(double value) {
-    final english = NumberFormat.decimalPattern('en_US').format(value.round());
+    final formatter = NumberFormat.decimalPattern('en_US');
+    final english = formatter.format(value.round());
     return _toPersian(english);
   }
 
