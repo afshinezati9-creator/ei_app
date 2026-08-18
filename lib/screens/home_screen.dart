@@ -1,13 +1,16 @@
+// ============================================================
+// مسیر: lib/screens/home_screen.dart
+// ============================================================
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/providers.dart';
 import '../widgets/balance_card.dart';
 import '../widgets/goal_card.dart';
-import '../widgets/notification_banner.dart'; // ✅ اضافه شد
+import '../widgets/notification_banner.dart';
 import 'list_screen.dart';
 import 'add_transaction_screen.dart';
 import 'goals_screen.dart';
-import 'package:ei_app/providers/providers.dart';
+import 'notifications_screen.dart'; // برای رفتن به صفحه اعلان‌ها
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,33 +43,201 @@ class _HomeScreenState extends State<HomeScreen> {
     final totalAccounts = data.getTotalAccountsBalance();
 
     return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const NotificationBanner(), // ✅ اضافه شد
-            BalanceCard(
-              balance: balance,
-              income: income,
-              expense: expense,
-              saving: saving,
-            ),
-            const SizedBox(height: 16),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ===== هدر صفحه خانه =====
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    Icon(Icons.home, color: theme.getPrimaryColor(), size: 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      'داشبورد',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: theme.getTextColor(),
+                      ),
+                    ),
+                    const Spacer(),
+                    // آیکون اعلان‌ها (اختیاری)
+                    IconButton(
+                      icon: Icon(
+                        Icons.notifications_outlined,
+                        color: theme.getTextSecondaryColor(),
+                        size: 24,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const NotificationsScreen(),
+                          ),
+                        );
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
 
-            Row(
-              children: [
-                _quickButton('💸', 'مخارج', () => _goTo(context, 'expenses')),
-                const SizedBox(width: 8),
-                _quickButton('💵', 'درآمد', () => _goTo(context, 'incomes')),
-                const SizedBox(width: 8),
-                _quickButton('🎯', 'اهداف', () => _goTo(context, 'goals')),
-                const SizedBox(width: 8),
-                _quickButton('📋', 'برنامه', () => _goTo(context, 'planning')),
-              ],
-            ),
-            const SizedBox(height: 16),
+              // ===== بنر اعلان‌های امروز =====
+              const NotificationBanner(),
+              const SizedBox(height: 12),
 
-            if (displayGoals.isNotEmpty)
+              // ===== کارت موجودی =====
+              BalanceCard(
+                balance: balance,
+                income: income,
+                expense: expense,
+                saving: saving,
+              ),
+              const SizedBox(height: 16),
+
+              // ===== دکمه‌های سریع =====
+              Row(
+                children: [
+                  _quickButton('💸', 'مخارج', () => _goTo(context, 'expenses')),
+                  const SizedBox(width: 8),
+                  _quickButton('💵', 'درآمد', () => _goTo(context, 'incomes')),
+                  const SizedBox(width: 8),
+                  _quickButton('🎯', 'اهداف', () => _goTo(context, 'goals')),
+                  const SizedBox(width: 8),
+                  _quickButton(
+                    '📋',
+                    'برنامه',
+                    () => _goTo(context, 'planning'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // ===== اهداف فعال =====
+              if (displayGoals.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.06),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.flag,
+                                size: 18,
+                                color: Color(0xFF6C5CE7),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'اهداف فعال',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFF6C5CE7,
+                                  ).withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '$totalGoals',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF6C5CE7),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () => _goTo(context, 'goals'),
+                            child: const Text(
+                              'مشاهده همه',
+                              style: TextStyle(
+                                color: Color(0xFF6C5CE7),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ...displayGoals.map(
+                        (goal) => Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: GoalCard(goal: goal),
+                        ),
+                      ),
+                      if (displayGoals.length < totalGoals)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            'و ${totalGoals - displayGoals.length} هدف دیگر...',
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              if (displayGoals.isNotEmpty) const SizedBox(height: 16),
+
+              // ===== خلاصه سریع =====
+              Row(
+                children: [
+                  _summaryBox(
+                    'اهداف',
+                    currency.formatCurrency(goals),
+                    Colors.orange,
+                  ),
+                  const SizedBox(width: 6),
+                  _summaryBox(
+                    'پس‌انداز',
+                    currency.formatCurrency(saving),
+                    Colors.blue,
+                  ),
+                  const SizedBox(width: 6),
+                  _summaryBox(
+                    'قرض+وام',
+                    currency.formatCurrency(debts),
+                    Colors.red,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // ===== مجموع موجودی حساب‌ها =====
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -74,148 +245,86 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.06),
+                      color: Colors.grey.withOpacity(0.08),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.flag, size: 18, color: Color(0xFF6C5CE7)),
-                            const SizedBox(width: 6),
-                            Text(
-                              'اهداف فعال',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF6C5CE7).withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                '$totalGoals',
-                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF6C5CE7)),
-                              ),
-                            ),
-                          ],
-                        ),
-                        GestureDetector(
-                          onTap: () => _goTo(context, 'goals'),
-                          child: const Text(
-                            'مشاهده همه',
-                            style: TextStyle(color: Color(0xFF6C5CE7), fontSize: 13, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    ...displayGoals.map((goal) => Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: GoalCard(goal: goal),
-                    )),
-                    if (displayGoals.length < totalGoals)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          'و ${totalGoals - displayGoals.length} هدف دیگر...',
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-                        ),
+                    const Text(
+                      'مجموع موجودی حساب‌ها',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
+                    ),
+                    Text(
+                      currency.formatCurrency(totalAccounts),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Color(0xFF6C5CE7),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            if (displayGoals.isNotEmpty) const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            Row(
-              children: [
-                _summaryBox('اهداف', currency.formatCurrency(goals), Colors.orange),
-                const SizedBox(width: 6),
-                _summaryBox('پس‌انداز', currency.formatCurrency(saving), Colors.blue),
-                const SizedBox(width: 6),
-                _summaryBox('قرض+وام', currency.formatCurrency(debts), Colors.red),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1A1A2E) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
+              // ===== آخرین تراکنش‌ها =====
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'مجموع موجودی حساب‌ها',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    'آخرین تراکنش‌ها',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
-                  Text(
-                    currency.formatCurrency(totalAccounts),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Color(0xFF6C5CE7),
+                  GestureDetector(
+                    onTap: () => _goTo(context, 'expenses'),
+                    child: const Text(
+                      'مشاهده همه',
+                      style: TextStyle(
+                        color: Color(0xFF6C5CE7),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'آخرین تراکنش‌ها',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                GestureDetector(
-                  onTap: () => _goTo(context, 'expenses'),
-                  child: const Text(
-                    'مشاهده همه',
-                    style: TextStyle(color: Color(0xFF6C5CE7), fontSize: 14, fontWeight: FontWeight.w600),
+              if (recent.isEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 30),
+                  alignment: Alignment.center,
+                  child: const Column(
+                    children: [
+                      Icon(Icons.inbox, size: 48, color: Colors.grey),
+                      SizedBox(height: 8),
+                      Text(
+                        'هنوز تراکنشی ثبت نشده',
+                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                      ),
+                    ],
                   ),
+                )
+              else
+                ...recent.map(
+                  (t) =>
+                      _buildTransactionItem(t, currency, dateProvider, isDark),
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            if (recent.isEmpty)
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 30),
-                alignment: Alignment.center,
-                child: const Column(
-                  children: [
-                    Icon(Icons.inbox, size: 48, color: Colors.grey),
-                    SizedBox(height: 8),
-                    Text('هنوز تراکنشی ثبت نشده', style: TextStyle(color: Colors.grey, fontSize: 14)),
-                  ],
-                ),
-              )
-            else
-              ...recent.map((t) => _buildTransactionItem(t, currency, dateProvider, isDark)),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
+  // ===== دکمه‌های سریع =====
   Widget _quickButton(String icon, String label, VoidCallback onTap) {
     return Expanded(
       child: GestureDetector(
@@ -223,9 +332,10 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? const Color(0xFF1A1A2E)
-                : Colors.white,
+            color:
+                Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF1A1A2E)
+                    : Colors.white,
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
@@ -241,7 +351,10 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 2),
               Text(
                 label,
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -250,6 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ===== باکس‌های خلاصه =====
   Widget _summaryBox(String label, String value, Color color) {
     return Expanded(
       child: Container(
@@ -263,12 +377,20 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(
               label,
-              style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
               value,
-              style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: color,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -276,6 +398,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // ===== آیتم تراکنش =====
   Widget _buildTransactionItem(
     dynamic t,
     CurrencyProvider currency,
@@ -287,7 +410,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final color = isNeg ? Colors.red.shade400 : Colors.green.shade400;
     final typeLabel = _getTypeLabel(t.type);
 
-    final displayDate = dateProvider.convertDate(t.date, dateProvider.currentFormat);
+    final displayDate = dateProvider.convertDate(
+      t.date,
+      dateProvider.currentFormat,
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
@@ -317,14 +443,14 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   t.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
                 Text(
                   '$displayDate · $typeLabel${t.categoryName.isNotEmpty ? ' · ${t.categoryName}' : ''}',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 11,
-                  ),
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
                 ),
               ],
             ),
@@ -363,23 +489,32 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  // ===== ناوبری =====
   void _goTo(BuildContext context, String page) {
     if (page == 'expenses' || page == 'incomes' || page == 'goals') {
       if (page == 'goals') {
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const GoalsScreen()));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const GoalsScreen()),
+        );
         return;
       }
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ListScreen(
-            sectionTitle: page == 'expenses' ? 'مخارج' : 'درآمدها',
-            items: page == 'expenses'
-                ? context.read<DataProvider>().getTransactionsByType('expense')
-                : context.read<DataProvider>().getTransactionsByType('income'),
-            isNegative: page == 'expenses',
-            isGoal: false,
-          ),
+          builder:
+              (_) => ListScreen(
+                sectionTitle: page == 'expenses' ? 'مخارج' : 'درآمدها',
+                items:
+                    page == 'expenses'
+                        ? context.read<DataProvider>().getTransactionsByType(
+                          'expense',
+                        )
+                        : context.read<DataProvider>().getTransactionsByType(
+                          'income',
+                        ),
+                isNegative: page == 'expenses',
+              ),
         ),
       );
     } else if (page == 'planning') {
@@ -387,9 +522,9 @@ class _HomeScreenState extends State<HomeScreen> {
         const SnackBar(content: Text('صفحه برنامه‌ریزی در حال ساخت')),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$page در حال ساخت')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('$page در حال ساخت')));
     }
   }
 }
